@@ -8,6 +8,18 @@ process.on('unhandledRejection', err => {
 
 if (!process.env.FORCE_COLOR) process.env.FORCE_COLOR = '0';
 
+// See: http://chaijs.com/plugins/chai-as-promised/
+// Customizing Output Promises
+// Makes sure that we have access to bluebird's finally in returned assertions
+// to execute local cleanup tasks.
+// This will enable it for all tests globally and additionally will throw if any
+// system promise is used anywhere (we only should use bluebird promises!).
+require('chai-as-promised').transferPromiseness = function (assertion, promise) {
+  const assertionRef = assertion;
+  assertionRef.then = promise.then.bind(promise);
+  assertionRef.finally = promise.finally.bind(promise);
+};
+
 if (process.argv.length <= 2) {
   process.argv.push(
     '!(node_modules)/**/*.test.js',
